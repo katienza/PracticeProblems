@@ -1,3 +1,10 @@
+class Node {
+  constructor(value) {
+    this.value = value
+    this.next = null
+  }
+}
+
 /* class myStack {
   constructor() {
     this.items = []
@@ -50,67 +57,93 @@ let stack = new myStack() */
 //   return this.items.length
 // }
 
-class Node {
-  constructor(value) {
-    this.value = value
-    this.next = null
-  }
-}
+// class MyStack {
+//   constructor() {
+//     this.first = null
+//     this.last = null
+//     this.size = 0
+//   }
+
+//   push(value) {
+//     let node = new Node(value)
+
+//     if (!this.first) {
+//       this.first = node
+//       this.last = node
+//     } else {
+//       let temp = this.first
+//       this.first = node
+//       this.first.next = temp
+//     }
+
+//     this.size = this.size + 1
+//     return this.size
+//   }
+
+//   pop() {
+//     if (!this.first) { 
+//       return null 
+//     }
+
+//     let temp = this.first
+
+//     if (this.first === this.last) { 
+//       this.last = null 
+//     }
+
+//     this.first = this.first.next
+//     this.size = this.size - 1
+
+//     return temp.value
+//   }
+
+//   peek() {
+//     if (!this.first) {
+//       return null
+//     } else {
+//       return this.first
+//     }
+//   }
+
+//   size() {
+//     return this.size
+//   }
+
+//   isEmpty() {
+//     return this.size === 0
+//   }
+// }
 
 class MyStack {
   constructor() {
-    this.first = null
-    this.last = null
+    this.stack = []
     this.size = 0
   }
 
   push(value) {
-    let node = new Node(value)
-
-    if (!this.first) {
-      this.first = node
-      this.last = node
-    } else {
-      let temp = this.first
-      this.first = node
-      this.first.next = temp
-    }
-
-    this.size = this.size + 1
-    return this.size
+    this.stack[this.size] = value
+    this.size++
   }
 
   pop() {
-    if (!this.first) { 
-      return null 
-    }
-
-    let temp = this.first
-
-    if (this.first === this.last) { 
-      this.last = null 
-    }
-
-    this.first = this.first.next
-    this.size = this.size - 1
-
-    return temp.value
+    this.size--
+    return this.stack[this.size]
   }
 
   peek() {
-    if (!this.first) {
-      return null
-    } else {
-      return this.first
-    }
+    return this.stack[this.size - 1]
+  }
+
+  isEmpty() {
+    return this.size === 0
   }
 
   size() {
     return this.size
   }
 
-  isEmpty() {
-    return this.size === 0
+  clear() {
+    this.size = 0
   }
 }
 
