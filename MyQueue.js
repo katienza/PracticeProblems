@@ -19,8 +19,8 @@ class MyQueue {
       this.head = node
       this.tail = node
     } else {
-      this.head.next = node
-      this.head = node
+      this.tail.next = node
+      this.tail = node
     }
     return ++this.size
   }
@@ -40,7 +40,7 @@ class MyQueue {
   }
 
   peek() {
-    return this.head
+    return this.tail
   }
 
   isEmpty() {
