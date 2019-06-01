@@ -183,8 +183,8 @@ class MySinglyLinkedList {
 */
   insert(index, value) {  // Adding a node to a specific location in singly linked list
     if (index < 0 || index > this.length) return false
-    if (index === 0) return this.unshift(value)
-    if (index === this.length) return this.push(value)
+    if (index === 0) this.unshift(value)
+    if (index === this.length) this.push(value)
     
     let node = new Node(value)
     let prevNode = this.get(index - 1)
@@ -212,8 +212,8 @@ class MySinglyLinkedList {
 */
   remove(index) {  // removing a node from a specific position in singly linked list
     if (index < 0 || index >= this.length) return undefined
-    if (index === 0) return this.shift()
-    if (index === this.length - 1) return this.pop()
+    if (index === 0) this.shift()
+    if (index === this.length - 1) this.pop()
 
     let previousNode = this.get(index - 1)
     let removedNode = previousNode.next
