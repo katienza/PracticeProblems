@@ -355,3 +355,339 @@ FROM customer
 WHERE first_name ILIKE 'E%' AND address_id < 500
 ORDER BY customer_id DESC
 LIMIT 1;
+
+
+
+
+
+
+
+
+
+/* JOINS SECTION */
+
+/* AS STATEMENT 
+Allows to rename columns or table selections with an alias
+*/
+SELECT payment_id AS my_payments_column 
+FROM payment;
+
+SELECT customer_id, SUM(amount) AS total_spent
+FROM payment
+GROUP BY customer_id;
+
+/* INNER JOIN STATEMENT
+Relating data in one data to the data in other tables
+INNER JOIN clause returns rows in A table that have corresponding rows in B table
+INNER JOIN is DEFAULT for JOIN statement
+*/
+
+/* INNER JOIN SYNTAX */
+SELECT A.pka, A.c1, B.pkb, B.c2 // specify columns in both tables which you want to select data in SELECT clause
+FROM A // specify main table in FROM clause
+INNER JOIN B ON A.pka = B.fka; // specify table that main table joins to in INNER JOIN clause, put a join condition after the ON keyword
+
+/* 
+For each row in A table, PostgreSQL scans the B table to check if there is any row that matches the condition A.pka = B.fka
+If it finds a match, it combines columns of both rows into one row
+and adds the combined row to the returned result set
+*/
+// A: customer table
+// B: payment table
+SELECT 
+customer.customer_id, // only have to specify customer table once because other columns are unique to customer table
+first_name, 
+last_name, 
+email, 
+amount, 
+payment_date
+FROM customer
+INNER JOIN payment ON payment.customer_id = customer.customer_id
+// ORDER BY customer.customer_id; // need to specify which table to take column name from
+// WHERE customer.customer_id = 2;
+WHERE customer.first_name LIKE 'A%';
+
+
+SELECT payment_id, amount, first_name, last_name
+FROM payment
+INNER JOIN staff ON payment.staff_id = staff.staff_id;
+
+
+SELECT store_id, title 
+FROM inventory
+INNER JOIN film
+ON inventory.film_id = film.film_id;
+
+// how many copies of each movie are at store_id = 1?
+SELECT title, COUNT(title) AS copies_at_store1
+FROM inventory
+INNER JOIN film
+ON inventory.film_id = film.film_id
+WHERE store_id = 1
+GROUP BY title
+ORDER BY title;
+
+// A: film table
+// B: language table
+SELECT title, name movie_language
+FROM film
+INNER JOIN language lan ON lan.language_id = film.language_id;
+
+
+
+
+
+
+/* OVERVIEW OF JOIN TYPES */
+/* INNER JOIN SYNTAX */
+SELECT * FROM TableA // specify columns in both tables which you want to select data in SELECT clause
+INNER JOIN TableB // specify main table in FROM clause
+ON TableA.name = TableB.name; // specify table that main table joins to in INNER JOIN clause, put a join condition after the ON keyword
+
+/* FULL OUTER JOIN
+Produces the set of all records in Table 1 and Table 2
+with matching records from both sides where available.
+If there is no match, the missing side will contain null.
+*/
+SELECT * FROM TableA
+FULL OUTER JOIN TableB
+ON TableA.name = TableB.name;
+
+/* FULL OUTER JOIN with WHERE CLAUSE
+Produce a set of records unique to Table 1 and Table 2,
+Perform full outer join, then
+exclude the records we don't want from both sides using a WHERE clause
+*/
+SELECT * FROM TableA
+FULL OUTER JOIN TableB
+ON TableA.name = TableB.name
+WHERE TableA.id IS null
+OR TableB.id IS null;
+
+/* LEFT OUTER JOIN
+Products a set of records from Table 1
+with the matching records (where available) in Table 2.
+If there is no match, the right side will contain null.
+*/
+SELECT * FROM TableA
+LEFT OUTER JOIN TableB
+ON TableA.name = TableB.name;
+
+/* LEFT OUTER JOIN with WHERE clause
+To produce a set of records only in Table 1, but not in Table 2
+Perform LEFT OUTER JOIN
+Then exclude the records we don't want from the right side using a WHERE clause
+*/
+SELECT * FROM TableA
+LEFT OUTER JOIN TableB
+ON TableA.name = TableB.name
+WHERE TableB.id IS null;
+
+/* RIGHT OUTER JOIN
+Products a set of records from Table 2
+with the matching records (where available) in Table 1.
+If there is no match, the left side will contain null.
+*/
+SELECT * FROM TableB
+LEFT OUTER JOIN TableA
+ON TableB.name = TableA.name;
+
+/* RIGHT OUTER JOIN with WHERE clause
+To produce a set of records only in Table 2, but not in Table 1
+Perform RIGHT OUTER JOIN
+Then exclude the records we don't want from the left side using a WHERE clause
+*/
+SELECT * FROM TableB
+RIGHT OUTER JOIN TableA
+ON TableB.name = TableA.name
+WHERE TableA.id IS null;
+
+
+
+
+/* EXAMPLE OF LEFT OUTER JOIN */
+SELECT film.film_id, film.title, inventory.inventory_id
+FROM film
+LEFT OUTER JOIN inventory 
+ON inventory.film_id = film.film_id
+WHERE inventory.film_id IS NULL
+ORDER BY film.film_id;
+
+SELECT film.film_id, film.title, inventory.inventory_id
+FROM film
+LEFT OUTER JOIN inventory 
+ON inventory.film_id = film.film_id
+WHERE inventory_id IS NULL
+ORDER BY film.title;
+
+
+
+
+
+
+/* UNION 
+UNION operator combines result sets of two or more SELECT statements into a single result set
+**** RULES ****
+Both queries must return the same number of columns.
+Corresponding columns in queries must have compatible data types.
+*/
+SELECT column_1, column_2
+FROM tbl_name_1
+UNION
+SELECT column_1, column_2
+FROM tbl_name_2;
+
+/* UNION USES
+UNION operator removes all duplicate rows unless the UNION ALL is used
+UNION operator may place rows in the first query before, after, or between the rows in the result set of second query
+To sort the rows in combined result set by a specific column, use ORDER BY clause
+
+UNION operator is used to combine data from similar tables that are not perfectly normalized
+*/
+SELECT * FROM sales2007q1
+UNION
+SELECT * FROM sales2007q2
+
+SELECT * FROM sales2007q1
+UNION ALL // adds duplicate rows into result set
+SELECT * FROM sales2007q2
+
+
+
+
+
+
+
+/* ADVANCED SQL COMMANDS */
+/* TIMESTAMPS AND EXTRACT 
+PostgreSQL extract function extracts parts from a date
+Extract many types of time-based information
+*/
+/* EXTRACT SYNTAX */
+extract(unit from date) 
+
+SELECT extract(day from payment_date) // extract and 'day' are lower case to not confuse SQL to use another table
+FROM payment;
+
+SELECT customer_id, extract(day from payment_date) AS day
+FROM payment;
+
+// How much did I get in payment from highest grossing month?
+SELECT SUM(amount) AS total, extract(month from payment_date) AS month
+FROM payment
+GROUP BY month
+ORDER BY total DESC
+LIMIT 1;
+
+
+
+/* MATH FUNCTIONS */
+SELECT customer_id + rental_id AS new_id FROM payment;
+SELECT customer_id * rental_id AS new_id FROM payment;
+SELECT customer_id - rental_id AS new_id FROM payment;
+SELECT customer_id / rental_id AS new_id FROM payment;
+SELECT round(AVG(amount), 2) FROM payment;
+
+
+
+/* SUBQUERY 
+A subquery is a query nested inside another query
+Constructing a subquery:
+    Put second query in brackets and use it in WHERE clause as an expression
+*/
+/*
+We want to find the films whose rental rate is higher than the average rental rate.
+*/
+// Find the average rental rate by using SELECT and AVG
+SELECT AVG(rental_rate)
+FROM film;
+// Use result of first query in the second SELECT statement to find the films that we want
+SELECT title, AVG(rental_rate)
+FROM film
+WHERE rental_rate > 2.98;
+
+/* SUBQUERY EXAMPLE */
+SELECT film_id, title, rental_rate
+FROM film
+WHERE rental_rate > (SELECT AVG(rental_rate) FROM film);
+
+SELECT film_id, title
+FROM film
+WHERE film_id IN (SELECT inventory.film_id
+FROM rental
+INNER JOIN inventory ON inventory.inventory_id = rental.inventory_id
+WHERE return_date BETWEEN '2005-05-29' AND '2005-05-30');
+
+
+
+/* SELF JOIN 
+Use SELF JOIN when you want to combine rows with other rows in same table
+To perform SELF JOIN operation, use a table alias to help SQL distinguish the left table from right table of the same table
+*/
+
+/* We want to find out which employees are from the same location as the employee named Joe */
+// SUBQUERY EXAMPLE
+SELECT employee_name FROM employee
+WHERE employee_location IN 
+(SELECT employee_location FROM employee
+WHERE employee_name = 'Joe');
+
+// SELF JOIN EXAMPLE
+SELECT e1.employee_name
+FROM employee AS e1, employee AS e2
+WHERE e1.employee_location = e2.employee_location
+AND e2.employee_name = 'Joe';
+
+
+SELECT a.customer_id, a.first_name, a.last_name, b.customer_id, b.first_name, b.last_name
+FROM customer AS a, customer AS b
+WHERE a.first_name = b.last_name;
+
+SELECT a.customer_id, a.first_name, a.last_name, b.customer_id, b.first_name, b.last_name
+FROM customer AS a
+LEFT OUTER JOIN customer AS b ON a.first_name = b.last_name // LEFT JOIN === LEFT OUTER JOIN, JOIN DEFAULTS TO INNER JOIN
+ORDER BY a.customer_id;
+
+
+
+
+
+
+/* ASSESSMENT 2 */
+// How can you retrieve all the information from the cd.facilities table?
+SELECT * FROM cd.facilities;
+
+// You want to print out a list of all of the facilities and their cost to members.
+// How would you retrieve a list of only facility names and costs?
+SELECT name, membercost FROM cd.facilities;
+
+// How can you produce a list of facilities that charge a fee to members?
+SELECT * FROM cd.facilities 
+WHERE membercost > 0;
+
+// How can you produce a list of facilities that charge a fee to members,
+// and that fee is less than 1/50th of the monthly maintenance cost?
+// Return the facid, facility name, member cost, and monthly maintenance 
+// of the facilities in question.
+SELECT facid, name, membercost, monthlymaintenance
+FROM cd.facilities
+WHERE membercost > 0 
+AND (membercost < monthlymaintenance/50.0)
+
+
+// How can you produce a list of all facilities with the word 'Tennis' in their name?
+SELECT *
+FROM cd.facilities
+WHERE name ILIKE '%Tennis%';
+
+// How can you retrieve the details of facilities with ID 1 and 5? 
+// Try to do it without using the OR operator.
+SELECT *
+FROM cd.facilities
+WHERE facid in (1, 5);
+
+// How can you produce a list of members who joined after the start of September 2012?
+// Return the memid, surname, firstname, and joindate of the members in question.
+SELECT memid, surname, firstname, joindate
+FROM cd.members
+WHERE joindate >= '2012-09-01';
